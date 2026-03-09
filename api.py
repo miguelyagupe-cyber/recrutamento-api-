@@ -11,7 +11,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 def parse_emails(raw):
     emails = []
-    blocos = re.split(r'\nCANDIDATO:', raw)
+    blocos = re.split(r'\n?CANDIDATO:', raw)
     for bloco in blocos:
         bloco = bloco.strip()
         if not bloco:

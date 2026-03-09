@@ -37,29 +37,33 @@ def extract_text_with_vision(filepath):
     )
     return response.content[0].text
 
-def read_cvs(folder="cvs"):
-    content = ""
-    for filename in os.listdir(folder):
-        filepath = os.path.join(folder, filename)
-        if filename.endswith(".pdf"):
-            # Tenta texto normal primeiro
-            text = ""
+def process_single_cv(args):
+    filename, filepath = args
+    if filename.endswith(".pdf"):
+        text = ""
+        try:
+            with pdfplumber.open(filepath) as pdf:
+                text = "\n".join(page.extract_text() or "" for page in pdf.pages).strip()
+        except:
+            pass
+        if len(text) < 100:
             try:
-                with pdfplumber.open(filepath) as pdf:
-                    text = "\n".join(page.extract_text() or "" for page in pdf.pages).strip()
-            except:
-                pass
-            # Se não extraiu texto suficiente, usa Claude Vision
-            if len(text) < 100:
-                try:
-                    text = extract_text_with_vision(filepath)
-                except Exception as e:
-                    text = f"[Erro ao processar: {e}]"
-            content += f"\n\n--- CV: {filename} ---\n{text}"
-        elif filename.endswith(".txt"):
-            with open(filepath) as f:
-                content += f"\n\n--- CV: {filename} ---\n{f.read()}"
-    return content
+                text = extract_text_with_vision(filepath)
+            except Exception as e:
+                text = f"[Erro ao processar: {e}]"
+        return f"\n\n--- CV: {filename} ---\n{text}"
+    elif filename.endswith(".txt"):
+        with open(filepath) as f:
+            return f"\n\n--- CV: {filename} ---\n{f.read()}"
+    return ""
+
+def read_cvs(folder="cvs"):
+    from concurrent.futures import ThreadPoolExecutor
+    files = [(f, os.path.join(folder, f)) for f in os.listdir(folder)
+             if f.endswith(".pdf") or f.endswith(".txt")]
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        results = list(executor.map(process_single_cv, files))
+    return "".join(results)
 
 @CrewBase
 class Recrutamento():
