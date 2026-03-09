@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Triagem de CVs</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; padding: 40px 20px; }
+    .container { background: white; border-radius: 12px; padding: 40px; width: 100%; max-width: 800px; margin: 0 auto; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    h1 { color: #1a1a2e; margin-bottom: 8px; font-size: 1.8rem; }
+    p.sub { color: #666; margin-bottom: 32px; }
+    label { display: block; font-weight: 600; color: #333; margin-bottom: 6px; margin-top: 20px; }
+    textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; resize: vertical; min-height: 120px; }
+    textarea:focus { outline: none; border-color: #4f46e5; }
+    input[type="text"] { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; margin-top: 4px; }
+    input[type="text"]:focus { outline: none; border-color: #4f46e5; }
+    .file-zone { border: 2px dashed #e0e0e0; border-radius: 8px; padding: 20px; background: #fafafa; text-align: center; cursor: pointer; transition: border-color 0.2s; }
+    .file-zone:hover { border-color: #4f46e5; }
+    .file-zone p { color: #888; font-size: 14px; margin-bottom: 8px; }
+    .btn-add-files { padding: 8px 20px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; }
+    .file-tag { display: inline-flex; align-items: center; gap: 6px; background: #f0f0ff; border: 1px solid #c7d2fe; border-radius: 20px; padding: 4px 12px; margin: 4px; font-size: 13px; color: #4f46e5; }
+    .file-tag button { background: none; border: none; cursor: pointer; color: #999; font-size: 16px; line-height: 1; padding: 0; }
+    button.primary { width: 100%; margin-top: 24px; padding: 14px; background: #4f46e5; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; }
+    button.primary:hover { background: #4338ca; }
+    button.primary:disabled { background: #a5b4fc; cursor: not-allowed; }
+    .loading { text-align: center; color: #4f46e5; font-weight: 600; margin-top: 16px; display: none; }
+    .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #e0e0e0; border-top-color: #4f46e5; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 8px; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .section { margin-top: 40px; padding: 24px; background: #f8f9ff; border-radius: 8px; border-left: 4px solid #4f46e5; display: none; }
+    .section h2 { color: #4f46e5; margin-bottom: 16px; }
+    .section pre { white-space: pre-wrap; font-size: 14px; color: #333; line-height: 1.6; }
+    .email-card { background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    .email-card h3 { color: #1a1a2e; margin-bottom: 8px; }
+    .email-input-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .email-input-row label { font-size: 13px; color: #666; margin: 0; font-weight: 500; white-space: nowrap; }
+    .email-input-row input { flex: 1; padding: 6px 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 13px; color: #4f46e5; }
+    .email-input-row input.missing { border-color: #f59e0b; background: #fffbeb; }
+    .email-input-row input.missing::placeholder { color: #d97706; }
+    .subject { font-weight: 600; color: #333; margin-bottom: 8px; font-size: 14px; }
+    .body { font-size: 14px; color: #555; line-height: 1.6; white-space: pre-wrap; background: #fafafa; padding: 12px; border-radius: 6px; margin-bottom: 12px; }
+    .email-actions { display: flex; gap: 8px; }
+    .btn-send { padding: 8px 20px; background: #16a34a; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
+    .btn-send:hover { background: #15803d; }
+    .btn-skip { padding: 8px 20px; background: #f3f4f6; color: #666; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    .sent-badge { display: inline-block; padding: 4px 12px; background: #dcfce7; color: #16a34a; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .skipped-badge { display: inline-block; padding: 4px 12px; background: #f3f4f6; color: #999; border-radius: 20px; font-size: 12px; }
+    .warning-badge { display: inline-block; padding: 2px 8px; background: #fef3c7; color: #d97706; border-radius: 10px; font-size: 11px; font-weight: 600; margin-left: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🤖 Triagem de CVs</h1>
+    <p class="sub">Análise automática de candidatos com IA</p>
+
+    <label>Descrição da Vaga</label>
+    <textarea id="job" placeholder="Cola aqui a descrição da vaga..."></textarea>
+
+    <label>Nome da Empresa (para os e-mails)</label>
+    <input type="text" id="empresa" placeholder="Ex: Acme Lda">
+
+    <label>CVs dos Candidatos (PDF ou TXT)</label>
+    <div class="file-zone" onclick="document.getElementById('file-input').click()">
+      <p>Clica para adicionar CVs — podes adicionar em várias vezes</p>
+      <button class="btn-add-files" onclick="event.stopPropagation(); document.getElementById('file-input').click()">+ Adicionar ficheiros</button>
+    </div>
+    <input type="file" id="file-input" multiple accept=".pdf,.txt" style="display:none" onchange="addFiles(this)">
+    <div id="file-list"></div>
+
+    <button class="primary" onclick="analisar()" id="btn">Analisar Candidatos</button>
+
+    <div class="loading" id="loading">
+      <span class="spinner"></span> A analisar candidatos... pode demorar alguns minutos.
+    </div>
+
+    <div class="section" id="relatorio">
+      <h2>📊 Relatório Final</h2>
+      <pre id="texto-relatorio"></pre>
+    </div>
+
+    <div class="section" id="emails-section">
+      <h2>📧 E-mails para os Top Candidatos</h2>
+      <p style="color:#666;margin-bottom:16px;font-size:14px;">Revê cada e-mail. Se o endereço estiver em branco, preenche manualmente antes de enviar.</p>
+      <div id="emails-list"></div>
+    </div>
+  </div>
+
+  <script>
+    let selectedFiles = [];
+
+    function addFiles(input) {
+      Array.from(input.files).forEach(f => {
+        if (!selectedFiles.find(x => x.name === f.name && x.size === f.size))
+          selectedFiles.push(f);
+      });
+      input.value = '';
+      renderFileList();
+    }
+
+    function removeFile(i) { selectedFiles.splice(i, 1); renderFileList(); }
+
+    function renderFileList() {
+      document.getElementById('file-list').innerHTML = selectedFiles.map((f, i) =>
+        `<span class="file-tag">📄 ${f.name} <button onclick="removeFile(${i})">×</button></span>`
+      ).join('');
+    }
+
+    async function analisar() {
+      const job = document.getElementById('job').value.trim();
+      const empresa = document.getElementById('empresa').value.trim() || 'a nossa empresa';
+      const btn = document.getElementById('btn');
+
+      if (!job) return alert('Por favor insere a descrição da vaga.');
+      if (selectedFiles.length === 0) return alert('Por favor adiciona pelo menos um CV.');
+
+      const formData = new FormData();
+      formData.append('job_description', job);
+      formData.append('empresa', empresa);
+      selectedFiles.forEach(f => formData.append('cvs', f));
+
+      btn.disabled = true;
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('relatorio').style.display = 'none';
+      document.getElementById('emails-section').style.display = 'none';
+
+      try {
+        const res = await fetch('http://localhost:8000/analisar', { method: 'POST', body: formData });
+        const data = await res.json();
+        document.getElementById('texto-relatorio').textContent = data.relatorio;
+        document.getElementById('relatorio').style.display = 'block';
+        renderEmails(data.emails);
+      } catch (e) {
+        alert('Erro ao conectar à API. Confirma que o backend está a correr em localhost:8000.');
+      } finally {
+        btn.disabled = false;
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+
+    function renderEmails(emails) {
+      const list = document.getElementById('emails-list');
+      list.innerHTML = '';
+      if (!emails || emails.length === 0) {
+        list.innerHTML = '<p style="color:#999">Não foram gerados e-mails.</p>';
+        document.getElementById('emails-section').style.display = 'block';
+        return;
+      }
+      emails.forEach((email, i) => {
+        const missing = !email.email;
+        const card = document.createElement('div');
+        card.className = 'email-card';
+        card.id = `card-${i}`;
+        card.innerHTML = `
+          <h3>${email.candidato} ${missing ? '<span class="warning-badge">⚠️ email em falta</span>' : ''}</h3>
+          <div class="email-input-row">
+            <label>Para:</label>
+            <input type="text" id="email-addr-${i}" value="${email.email}" 
+              class="${missing ? 'missing' : ''}"
+              placeholder="${missing ? 'Insere o e-mail manualmente' : ''}">
+          </div>
+          <div class="subject"><strong>Assunto:</strong> ${email.assunto}</div>
+          <div class="body">${email.corpo}</div>
+          <div class="email-actions">
+            <button class="btn-send" onclick="enviarEmail(${i},'${escapeJs(email.assunto)}','${escapeJs(email.corpo)}')">✅ Confirmar envio</button>
+            <button class="btn-skip" onclick="saltarEmail(${i})">❌ Não enviar</button>
+          </div>`;
+        list.appendChild(card);
+      });
+      document.getElementById('emails-section').style.display = 'block';
+    }
+
+    function enviarEmail(i, assunto, corpo) {
+      const emailAddr = document.getElementById(`email-addr-${i}`).value.trim();
+      if (!emailAddr) return alert('Por favor insere o endereço de e-mail primeiro.');
+      window.open(`mailto:${emailAddr}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`);
+      document.querySelector(`#card-${i} .email-actions`).innerHTML = '<span class="sent-badge">✅ E-mail aberto no cliente de correio</span>';
+    }
+
+    function saltarEmail(i) {
+      document.querySelector(`#card-${i} .email-actions`).innerHTML = '<span class="skipped-badge">Não enviado</span>';
+    }
+
+    function escapeJs(str) {
+      return (str || '').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+    }
+  </script>
+</body>
+</html>

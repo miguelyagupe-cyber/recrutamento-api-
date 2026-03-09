@@ -1,0 +1,7 @@
+.env
+cvs/
+__pycache__/
+*.pyc
+.crewai/
+*.pdf
+*.txt

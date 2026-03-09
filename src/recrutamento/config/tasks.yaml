@@ -1,0 +1,114 @@
+analyze_task:
+  description: >
+    Vaga: {job_description}
+
+    CVs disponíveis: {cvs_content}
+
+    INSTRUCOES:
+    1. Le a vaga e identifica os requisitos obrigatorios e desajaveis
+    2. Analisa APENAS os CVs fornecidos - NUNCA inventes candidatos
+    3. Para cada candidato extrai PRIMEIRO o email:
+       - Procura no texto por padroes como @gmail @hotmail @outlook @yahoo ou qualquer @dominio
+       - Copia o email EXACTO como aparece no CV
+       - Se nao encontrares: escreve NAO ENCONTRADO
+
+    4. Calcula o score OBRIGATORIAMENTE assim:
+
+    FORMACAO (maximo 15):
+    - Licenciatura exacta pedida = 15
+    - Area relacionada = 8
+    - Area diferente = 0
+    VALOR_FORMACAO = [escreve o valor aqui]
+
+    SKILLS OBRIGATORIAS (maximo 40):
+    - Lista todas as skills obrigatorias da vaga
+    - Para cada skill AUSENTE no CV: desconta 8 pontos
+    - Comeca em 40 e subtrai 8 por cada skill em falta
+    - Minimo = 0
+    VALOR_SKILLS_OBR = [escreve o valor aqui]
+
+    SKILLS DESAJAVEIS (maximo 15):
+    - Conta quantas skills desajaveis estao presentes no CV
+    - Divide pelo total e multiplica por 15
+    VALOR_SKILLS_DES = [escreve o valor aqui]
+
+    EXPERIENCIA (maximo 20):
+    - Nenhuma experiencia relevante = 0
+    - Experiencia fraca ou indirecta = 5
+    - Experiencia adequada = 15
+    - Supera o requerido = 20
+    VALOR_EXP = [escreve o valor aqui]
+
+    SOFT SKILLS (maximo 5):
+    VALOR_SOFT = [escreve o valor aqui]
+
+    BONUS (maximo 5):
+    VALOR_BONUS = [escreve o valor aqui]
+
+    SCORE FINAL = VALOR_FORMACAO + VALOR_SKILLS_OBR + VALOR_SKILLS_DES + VALOR_EXP + VALOR_SOFT + VALOR_BONUS
+    ESCREVE A SOMA: [X] + [Y] + [Z] + [W] + [V] + [U] = [TOTAL]
+    USA O TOTAL COMO SCORE FINAL.
+
+    REGRAS:
+    - Se skills obrigatorias criticas ausentes, score maximo = 35
+    - Scores acima de 80 sao raros
+    - Se rigoroso e realista
+
+    CLASSIFICACAO:
+    75-100 = Forte candidato
+    50-74  = Candidato aceitavel
+    25-49  = Fraco
+    0-24   = Nao recomendado
+
+    NAO USES markdown, asteriscos, hashtags nem formatacao especial. Texto simples apenas.
+
+    Formato obrigatorio:
+    RANKING FINAL
+    [posicao]. [nome] - [score]/100 - [classificacao]
+    Email CV: [email extraido]
+    Formacao: [valor]/15
+    Skills obrigatorias: [valor]/40 (ausentes: [lista])
+    Skills desajaveis: [valor]/15 (presentes: [lista ou nenhuma])
+    Experiencia: [valor]/20
+    Soft skills: [valor]/5
+    Bonus: [valor]/5
+    Soma: [X]+[Y]+[Z]+[W]+[V]+[U] = [total]
+    Pontos fortes: [lista]
+    Pontos fracos: [lista]
+    ---
+  expected_output: Ranking com score calculado explicitamente, sem markdown, com email real do CV
+  agent: cv_analyzer
+
+email_task:
+  description: >
+    Com base no ranking anterior, redige emails para os top 3 candidatos reais.
+    Se o ranking tiver 1 candidato, rediges 1 email. Se tiver 2, rediges 2.
+    NUNCA cries emails para candidatos que nao aparecem no ranking.
+
+    O email de cada candidato esta indicado no ranking como "Email CV: [email]".
+    USA ESSE EMAIL EXACTO. Nao inventes nem alteres o email.
+
+    Para cada candidato:
+    - Menciona APENAS 1 ponto forte dos "Pontos fortes" do ranking
+    - NUNCA menciones scores, pontuacoes, classificacoes nem pontos fracos
+    - NUNCA digas o que o candidato nao sabe ou precisa de aprender
+    - Convida para entrevista sem data definida
+    - Tom profissional e breve - maximo 3 paragrafos
+    - Assina como "Equipa de Recrutamento - {empresa}"
+
+    NAO USES markdown, asteriscos, hashtags nem formatacao especial. Texto simples apenas.
+
+    O teu output deve ter DUAS seccoes:
+
+    SECCAO 1 - RELATORIO:
+    Copia na integra o RANKING FINAL completo da tarefa anterior.
+    Inclui todas as categorias, pontos fortes e pontos fracos. NAO RESUMIR.
+
+    SECCAO 2 - EMAILS:
+    CANDIDATO: [nome]
+    EMAIL: [email exacto do campo "Email CV" do ranking]
+    ASSUNTO: [assunto]
+    CORPO: [corpo sem scores nem rankings]
+    ---
+  expected_output: Relatorio completo seguido de emails simples sem markdown e sem mencao a pontos fracos
+  agent: email_writer
