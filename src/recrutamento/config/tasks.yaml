@@ -20,11 +20,12 @@ analyze_task:
     - Area diferente = 0
     VALOR_FORMACAO = [escreve o valor aqui]
 
-    SKILLS OBRIGATORIAS (maximo 40):
+    SKILLS OBRIGATORIAS (maximo 25):
     - Lista todas as skills obrigatorias da vaga
-    - Para cada skill AUSENTE no CV: desconta 8 pontos
-    - Comeca em 40 e subtrai 8 por cada skill em falta
+    - Para cada skill AUSENTE no CV: desconta 1.5 pontos
+    - Comeca em 25 e subtrai 1.5 por cada skill em falta
     - Minimo = 0
+    - Considera skills parcialmente presentes como meia penalizacao (0.5 pontos)
     VALOR_SKILLS_OBR = [escreve o valor aqui]
 
     SKILLS DESAJAVEIS (maximo 15):
@@ -32,11 +33,12 @@ analyze_task:
     - Divide pelo total e multiplica por 15
     VALOR_SKILLS_DES = [escreve o valor aqui]
 
-    EXPERIENCIA (maximo 20):
+    EXPERIENCIA (maximo 35):
     - Nenhuma experiencia relevante = 0
-    - Experiencia fraca ou indirecta = 5
-    - Experiencia adequada = 15
-    - Supera o requerido = 20
+    - Experiencia fraca ou indirecta = 8
+    - Experiencia transferivel com potencial = 15
+    - Experiencia adequada = 25
+    - Supera o requerido = 35
     VALOR_EXP = [escreve o valor aqui]
 
     SOFT SKILLS (maximo 5):
@@ -50,9 +52,11 @@ analyze_task:
     USA O TOTAL COMO SCORE FINAL.
 
     REGRAS:
-    - Se skills obrigatorias criticas ausentes, score maximo = 35
-    - Scores acima de 80 sao raros
-    - Se rigoroso e realista
+    - Scores acima de 85 sao raros e so para candidatos excepcionais
+    - Se rigoroso mas justo - valoriza experiencia transferivel e potencial
+    - Raciocina em voz alta para cada categoria antes de atribuir o valor
+    - Justifica cada score com evidencias concretas do CV
+    - Considera o contexto completo do candidato, nao apenas palavras-chave
 
     CLASSIFICACAO:
     75-100 = Forte candidato
@@ -60,29 +64,33 @@ analyze_task:
     25-49  = Fraco
     0-24   = Nao recomendado
 
+    IMPORTANTE: No ranking final inclui APENAS candidatos com score igual ou superior a 45.
+    Candidatos abaixo de 45 nao aparecem no ranking.
+
     NAO USES markdown, asteriscos, hashtags nem formatacao especial. Texto simples apenas.
 
-    Formato obrigatorio:
+    Formato obrigatorio para cada candidato incluido:
     RANKING FINAL
     [posicao]. [nome] - [score]/100 - [classificacao]
     Email CV: [email extraido]
     Formacao: [valor]/15
-    Skills obrigatorias: [valor]/40 (ausentes: [lista])
+    Skills obrigatorias: [valor]/25 (ausentes: [lista])
     Skills desajaveis: [valor]/15 (presentes: [lista ou nenhuma])
-    Experiencia: [valor]/20
+    Experiencia: [valor]/35
     Soft skills: [valor]/5
     Bonus: [valor]/5
     Soma: [X]+[Y]+[Z]+[W]+[V]+[U] = [total]
-    Pontos fortes: [lista]
-    Pontos fracos: [lista]
+    Raciocinio: [2-3 frases explicando o perfil do candidato e porque ficou nesta posicao]
+    Pontos fortes: [lista detalhada]
+    Pontos fracos: [lista detalhada]
     ---
-  expected_output: Ranking com score calculado explicitamente, sem markdown, com email real do CV
+  expected_output: Ranking com score calculado explicitamente, sem markdown, com email real do CV, apenas candidatos com score >= 45
   agent: cv_analyzer
 
 email_task:
   description: >
-    Com base no ranking anterior, redige emails para os top 3 candidatos reais.
-    Se o ranking tiver 1 candidato, rediges 1 email. Se tiver 2, rediges 2.
+    Com base no ranking anterior, redige emails para os top 5 candidatos reais com score >= 45.
+    Se o ranking tiver menos de 5 candidatos, rediges apenas os que existem.
     NUNCA cries emails para candidatos que nao aparecem no ranking.
 
     O email de cada candidato esta indicado no ranking como "Email CV: [email]".
@@ -102,7 +110,7 @@ email_task:
 
     SECCAO 1 - RELATORIO:
     Copia na integra o RANKING FINAL completo da tarefa anterior.
-    Inclui todas as categorias, pontos fortes e pontos fracos. NAO RESUMIR.
+    Inclui todas as categorias, raciocinio, pontos fortes e pontos fracos. NAO RESUMIR.
 
     SECCAO 2 - EMAILS:
     CANDIDATO: [nome]
