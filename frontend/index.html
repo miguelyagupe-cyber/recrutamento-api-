@@ -124,7 +124,7 @@
       document.getElementById('emails-section').style.display = 'none';
 
       try {
-        const res = await fetch('http://localhost:8000/analisar', { method: 'POST', body: formData });
+        const res = await fetch('https://web-production-9d162.up.railway.app/analisar', { method: 'POST', body: formData });
         const data = await res.json();
         document.getElementById('texto-relatorio').textContent = data.relatorio;
         document.getElementById('relatorio').style.display = 'block';

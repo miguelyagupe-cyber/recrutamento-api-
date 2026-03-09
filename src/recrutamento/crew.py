@@ -32,7 +32,7 @@ def extract_text_with_vision(filepath):
     })
     response = client.messages.create(
         model="claude-haiku-4-5-20251001",
-        max_tokens=2000,
+        max_tokens=8000,
         messages=[{"role": "user", "content": content}]
     )
     return response.content[0].text
