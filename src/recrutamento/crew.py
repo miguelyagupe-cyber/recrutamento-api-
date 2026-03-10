@@ -10,7 +10,7 @@ from crewai.project import CrewBase, agent, crew, task
 
 load_dotenv()
 
-llm = LLM(model="claude-sonnet-4-5")
+llm = LLM(model="claude-sonnet-4-5", max_tokens=8000)
 
 client = anthropic.Anthropic()
 

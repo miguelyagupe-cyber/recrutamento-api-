@@ -7,116 +7,69 @@ analyze_task:
     INSTRUCOES:
     1. Le a vaga e identifica os requisitos obrigatorios e desajaveis
     2. Analisa APENAS os CVs fornecidos - NUNCA inventes candidatos
-    3. Para cada candidato extrai PRIMEIRO o email:
-       - Procura no texto por padroes como @gmail @hotmail @outlook @yahoo ou qualquer @dominio
-       - Copia o email EXACTO como aparece no CV
-       - Se nao encontrares: escreve NAO ENCONTRADO
+    3. Para cada candidato extrai o email exacto do CV
 
-    4. Calcula o score OBRIGATORIAMENTE assim:
+    4. Calcula o score para cada candidato:
 
-    FORMACAO (maximo 15):
-    - Licenciatura exacta pedida = 15
-    - Area relacionada = 8
-    - Area diferente = 0
-    VALOR_FORMACAO = [escreve o valor aqui]
+    FORMACAO (maximo 15): Licenciatura exacta=15, area relacionada=8, diferente=0
+    SKILLS OBRIGATORIAS (maximo 25): comeca em 25, desconta 1.5 por cada skill ausente
+    SKILLS DESAJAVEIS (maximo 15): proporcional ao numero presente
+    EXPERIENCIA (maximo 35): nenhuma=0, fraca=8, transferivel=15, adequada=25, supera=35
+    SOFT SKILLS (maximo 5)
+    BONUS (maximo 5)
 
-    SKILLS OBRIGATORIAS (maximo 25):
-    - Lista todas as skills obrigatorias da vaga
-    - Para cada skill AUSENTE no CV: desconta 1.5 pontos
-    - Comeca em 25 e subtrai 1.5 por cada skill em falta
-    - Minimo = 0
-    - Considera skills parcialmente presentes como meia penalizacao (0.5 pontos)
-    VALOR_SKILLS_OBR = [escreve o valor aqui]
+    CLASSIFICACAO: 75-100=Forte candidato, 50-74=Aceitavel, 25-49=Fraco, 0-24=Nao recomendado
+    Inclui APENAS candidatos com score >= 45 no ranking.
 
-    SKILLS DESAJAVEIS (maximo 15):
-    - Conta quantas skills desajaveis estao presentes no CV
-    - Divide pelo total e multiplica por 15
-    VALOR_SKILLS_DES = [escreve o valor aqui]
+    NAO USES markdown, asteriscos nem formatacao especial. Texto simples apenas.
 
-    EXPERIENCIA (maximo 35):
-    - Nenhuma experiencia relevante = 0
-    - Experiencia fraca ou indirecta = 8
-    - Experiencia transferivel com potencial = 15
-    - Experiencia adequada = 25
-    - Supera o requerido = 35
-    VALOR_EXP = [escreve o valor aqui]
+    Formato obrigatorio do output — APENAS ISTO, nada mais:
 
-    SOFT SKILLS (maximo 5):
-    VALOR_SOFT = [escreve o valor aqui]
-
-    BONUS (maximo 5):
-    VALOR_BONUS = [escreve o valor aqui]
-
-    SCORE FINAL = VALOR_FORMACAO + VALOR_SKILLS_OBR + VALOR_SKILLS_DES + VALOR_EXP + VALOR_SOFT + VALOR_BONUS
-    ESCREVE A SOMA: [X] + [Y] + [Z] + [W] + [V] + [U] = [TOTAL]
-    USA O TOTAL COMO SCORE FINAL.
-
-    REGRAS:
-    - Scores acima de 85 sao raros e so para candidatos excepcionais
-    - Se rigoroso mas justo - valoriza experiencia transferivel e potencial
-    - Raciocina em voz alta para cada categoria antes de atribuir o valor
-    - Justifica cada score com evidencias concretas do CV
-    - Considera o contexto completo do candidato, nao apenas palavras-chave
-
-    CLASSIFICACAO:
-    75-100 = Forte candidato
-    50-74  = Candidato aceitavel
-    25-49  = Fraco
-    0-24   = Nao recomendado
-
-    IMPORTANTE: No ranking final inclui APENAS candidatos com score igual ou superior a 45.
-    Candidatos abaixo de 45 nao aparecem no ranking.
-
-    NAO USES markdown, asteriscos, hashtags nem formatacao especial. Texto simples apenas.
-
-    Formato obrigatorio para cada candidato incluido:
     RANKING FINAL
     [posicao]. [nome] - [score]/100 - [classificacao]
-    Email CV: [email extraido]
+    Email CV: [email]
     Formacao: [valor]/15
     Skills obrigatorias: [valor]/25 (ausentes: [lista])
-    Skills desajaveis: [valor]/15 (presentes: [lista ou nenhuma])
+    Skills desajaveis: [valor]/15 (presentes: [lista])
     Experiencia: [valor]/35
     Soft skills: [valor]/5
     Bonus: [valor]/5
-    Soma: [X]+[Y]+[Z]+[W]+[V]+[U] = [total]
-    Raciocinio: [2-3 frases explicando o perfil do candidato e porque ficou nesta posicao]
-    Pontos fortes: [lista detalhada]
-    Pontos fracos: [lista detalhada]
+    Soma: [a]+[b]+[c]+[d]+[e]+[f] = [total]
+    Pontos fortes: [2-3 pontos maximos]
+    Pontos fracos: [1-2 pontos maximos]
     ---
-  expected_output: Ranking com score calculado explicitamente, sem markdown, com email real do CV, apenas candidatos com score >= 45
+
+  expected_output: Ranking final conciso apenas com os campos obrigatorios, sem a analise detalhada intermédia, emails reais, apenas candidatos >= 45, sem markdown
   agent: cv_analyzer
 
 email_task:
   description: >
-    Com base no ranking anterior, redige emails para os top 5 candidatos reais com score >= 45.
-    Se o ranking tiver menos de 5 candidatos, rediges apenas os que existem.
-    NUNCA cries emails para candidatos que nao aparecem no ranking.
+    Com base no ranking anterior, redige emails para os top 5 candidatos com score >= 45.
+    Se houver menos de 5, rediges apenas os que existem.
+    NUNCA cries emails para candidatos que nao estao no ranking.
 
-    O email de cada candidato esta indicado no ranking como "Email CV: [email]".
-    USA ESSE EMAIL EXACTO. Nao inventes nem alteres o email.
+    O email esta no campo "Email CV" do ranking. USA ESSE EMAIL EXACTO.
 
     Para cada candidato:
-    - Menciona APENAS 1 ponto forte dos "Pontos fortes" do ranking
-    - NUNCA menciones scores, pontuacoes, classificacoes nem pontos fracos
-    - NUNCA digas o que o candidato nao sabe ou precisa de aprender
+    - Menciona apenas 1 ponto forte
+    - NUNCA menciones scores, pontuacoes nem pontos fracos
     - Convida para entrevista sem data definida
     - Tom profissional e breve - maximo 3 paragrafos
     - Assina como "Equipa de Recrutamento - {empresa}"
 
-    NAO USES markdown, asteriscos, hashtags nem formatacao especial. Texto simples apenas.
+    NAO USES markdown, asteriscos nem formatacao especial. Texto simples apenas.
 
-    O teu output deve ter DUAS seccoes:
+    Output OBRIGATORIO com estas duas seccoes exactas:
 
     SECCAO 1 - RELATORIO:
-    Copia na integra o RANKING FINAL completo da tarefa anterior.
-    Inclui todas as categorias, raciocinio, pontos fortes e pontos fracos. NAO RESUMIR.
+    [copia aqui o RANKING FINAL completo]
 
     SECCAO 2 - EMAILS:
     CANDIDATO: [nome]
-    EMAIL: [email exacto do campo "Email CV" do ranking]
+    EMAIL: [email exacto]
     ASSUNTO: [assunto]
-    CORPO: [corpo sem scores nem rankings]
+    CORPO: [corpo]
     ---
-  expected_output: Relatorio completo seguido de emails simples sem markdown e sem mencao a pontos fracos
+
+  expected_output: SECCAO 1 com ranking completo seguido de SECCAO 2 com emails simples
   agent: email_writer
