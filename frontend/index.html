@@ -654,7 +654,11 @@
       document.getElementById('emails-section').style.display = 'none';
 
       try {
-        const res = await fetch('https://web-production-9d162.up.railway.app/analisar', { method: 'POST', body: formData });
+        const res = await fetch('https://web-production-9d162.up.railway.app/analisar', {
+          method: 'POST',
+          headers: { X-Access-Code': '20232023' },
+          body: formData
+        });
         const data = await res.json();
         document.getElementById('texto-relatorio').textContent = data.relatorio;
         document.getElementById('relatorio').style.display = 'block';

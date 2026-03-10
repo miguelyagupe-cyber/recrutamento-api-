@@ -9,3 +9,4 @@ pillow==12.1.1
 pytesseract==0.3.13
 python-dotenv==1.1.1
 uvicorn==0.41.0
+slowapi==0.1.9
